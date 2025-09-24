@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .welcome-title {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .username {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .login-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .actions {
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+        }
+
+        .logout-btn {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+        }
+
+        .features {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+        }
+
+        .feature-icon {
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .feature-text {
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            .welcome-title {
+                font-size: 2em;
+            }
+            
+            .btn {
+                display: block;
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="welcome-title">🎉 欢迎回来！</h1>
+        
+        <div class="user-info">
+            <div class="username" id="username">用户</div>
+            <div class="login-time" id="loginTime">登录时间：<span id="currentTime"></span></div>
+        </div>
+
+        <div class="features">
+            <div class="feature-item">
+                <div class="feature-icon">✓</div>
+                <div class="feature-text">安全登录认证</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">JWT Token 保护</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💾</div>
+                <div class="feature-text">数据安全存储</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn" onclick="getUserProfile()">获取用户信息</button>
+            <button class="btn btn-secondary" onclick="goBack()">返回登录</button>
+            <button class="btn logout-btn" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <script>
+        // 显示当前时间
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN');
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        // 获取用户信息
+        function getUserProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('未找到认证token，请重新登录');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            fetch('/api/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('username').textContent = data.data.username;
+                    alert('用户ID: ' + data.data.user_id + '\n用户名: ' + data.data.username);
+                } else {
+                    alert('获取用户信息失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('请求失败，请检查网络连接');
+            });
+        }
+
+        // 返回登录页面
+        function goBack() {
+            window.location.href = '/login.html';
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            alert('已退出登录');
+            window.location.href = '/login.html';
+        }
+
+        // 页面加载时检查认证状态
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            
+            if (!token) {
+                alert('未登录，请先登录');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            if (username) {
+                document.getElementById('username').textContent = username;
+            }
+
+            updateTime();
+            setInterval(updateTime, 1000); // 每秒更新时间
+        };
+    </script>
+</body>
+</html>

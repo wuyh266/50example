@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录界面</title>
+    <link rel="stylesheet" href="login.css">
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+</head>
+<body>
+    <div class="box">
+        <div class="pre-box">
+            <h1>WELCOM</h1>
+            <p>JOIN US!</p>
+            <div class="img-box">
+                <img src="img/soyo.jpg" alt="用户头像" onerror="this.src='img/default.jpg'">
+            </div>
+        </div>
+        <div class="register-form">
+            <div class="title-box">
+                <h1>注册</h1>
+            </div>
+            <div class="error-message" id="registerError"></div>
+            <div class="input-box">
+                <input type="text" id="regUsername" placeholder="用户名">
+                <input type="password" id="regPassword" placeholder="密码">
+                <input type="password" id="regConfirmPassword" placeholder="确认密码">
+            </div>
+            <div class="btn-box">
+                <button type="button" onclick="register()">注册</button>
+                <p onclick="myswitch()">已经有账号？前往登录</p>
+            </div>
+        </div>
+        <div class="login-form">
+            <div class="title-box">
+                <h1>登录</h1>
+            </div>
+            <div class="error-message" id="loginError"></div>
+            <div class="input-box">
+                <input type="text" id="loginUsername" placeholder="用户名">
+                <input type="password" id="loginPassword" placeholder="密码">
+            </div>
+            <div class="btn-box">
+                <button type="button" onclick="login()">登录</button>
+                <p onclick="myswitch()">没有账号？前往注册</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        let flag = true;
+        const myswitch = () => {
+            // 清除错误消息
+            document.getElementById('registerError').textContent = '';
+            document.getElementById('loginError').textContent = '';
+            
+            if (flag) {
+                $(".pre-box").css("transform", "translateX(100%)")
+                $(".pre-box").css("background-color", "#A0A0FB")
+                $("img").attr("src", "./img/soyoxiu.jpg")
+            } else {
+                $(".pre-box").css("transform", "translateX(0%)")
+                $(".pre-box").css("background-color", "#97B8FC")
+                $("img").attr("src", "./img/soyo.jpg")
+            }
+            flag = !flag;
+        }
+
+        // 注册功能
+        function register() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const errorElement = document.getElementById('registerError');
+
+            // 前端验证
+            if (!username || !password || !confirmPassword) {
+                errorElement.textContent = '请填写所有字段';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorElement.textContent = '两次密码输入不一致';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorElement.textContent = '密码长度不能少于6位';
+                return;
+            }
+
+            // 发送注册请求到后端
+            $.ajax({
+                url: '/api/register',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        alert('注册成功，请登录');
+                        myswitch();
+                    } else {
+                        errorElement.textContent = response.message || '注册失败，请重试';
+                    }
+                },
+                error: function(xhr) {
+                    const error = JSON.parse(xhr.responseText);
+                    errorElement.textContent = error.message || '服务器错误，请稍后重试';
+                }
+            });
+        }
+
+        // 登录功能
+        function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorElement = document.getElementById('loginError');
+
+            // 前端验证
+            if (!username || !password) {
+                errorElement.textContent = '请填写用户名和密码';
+                return;
+            }
+
+            // 发送登录请求到后端
+            $.ajax({
+                url: '/api/login',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('token', response.token);
+                        localStorage.setItem('username', username);
+                        window.location.href = '/index.html';
+                    } else {
+                        errorElement.textContent = response.message || '用户名或密码错误';
+                    }
+                },
+                error: function(xhr) {
+                    const error = JSON.parse(xhr.responseText);
+                    errorElement.textContent = error.message || '服务器错误，请稍后重试';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
