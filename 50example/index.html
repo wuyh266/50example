@@ -169,14 +169,11 @@
     </div>
 
     <script>
-        // 显示当前时间
         function updateTime() {
             const now = new Date();
             const timeString = now.toLocaleString('zh-CN');
             document.getElementById('currentTime').textContent = timeString;
         }
-
-        // 获取用户信息
         function getUserProfile() {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -207,12 +204,10 @@
             });
         }
 
-        // 返回登录页面
         function goBack() {
             window.location.href = '/login.html';
         }
 
-        // 退出登录
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('username');
@@ -220,7 +215,6 @@
             window.location.href = '/login.html';
         }
 
-        // 页面加载时检查认证状态
         window.onload = function() {
             const token = localStorage.getItem('token');
             const username = localStorage.getItem('username');
@@ -236,8 +230,9 @@
             }
 
             updateTime();
-            setInterval(updateTime, 1000); // 每秒更新时间
+            setInterval(updateTime, 1000); 
         };
     </script>
 </body>
 </html>
+
